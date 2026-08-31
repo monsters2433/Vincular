@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  finanzas-sync:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: finanzas-sync
+    environment:
+      FINANZAS_API_URL: ${FINANZAS_API_URL:-https://finanzas.example.com}
+      FINANZAS_API_TOKEN: ${FINANZAS_API_TOKEN:-sk_live_demo}
+      NODE_ENV: production
+      DATA_PATH: /data/finanzas
+    volumes:
+      - finanzas-data:/data/finanzas
+    restart: unless-stopped
+    networks:
+      - homelab
+    healthcheck:
+      test: ["CMD", "test", "-f", "/data/finanzas/dashboard.json"]
+      interval: 5m
+      timeout: 10s
+      retries: 3
+
+volumes:
+  finanzas-data:
+    driver: local
+
+networks:
+  homelab:
+    external: true
+    name: homelab
